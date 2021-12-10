@@ -1,0 +1,9 @@
+name: RedstoneInfo
+version: ${project.version}
+main: me.samsuik.redstoneinfo.RedstoneInfo
+authors: [ SK ]
+depends: [ ProtocolLib ]
+commands:
+  redstoneinfo:
+    aliases:
+      - rinfo

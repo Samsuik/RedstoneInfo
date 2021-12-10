@@ -1,0 +1,3 @@
+command:
+  enabled: "&8(&dR&8/&5Info&8) &fEnabled &eRedstoneInfo"
+  disabled: "&8(&dR&8/&5Info&8) &fDisabled &eRedstoneInfo"
