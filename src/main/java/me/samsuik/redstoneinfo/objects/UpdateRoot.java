@@ -32,12 +32,12 @@ public class UpdateRoot {
         return updateNum++;
     }
 
-    public void handleOrder() {
+    public void recalculateOrder() {
         int order = 0;
 
         for (RedstoneUpdate update : updateMap.values()) {
-            if (update.getOrder() == -1) {
-                update.setOrder(order++);
+            if (update.order == -1) {
+                update.order = order++;
             }
         }
 

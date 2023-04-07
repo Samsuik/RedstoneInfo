@@ -2,7 +2,6 @@ package me.samsuik.redstoneinfo.config;
 
 import me.samsuik.redstoneinfo.holograms.Hologram;
 import me.samsuik.redstoneinfo.objects.RedstoneUpdate;
-import me.samsuik.redstoneinfo.objects.UpdateRoot;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -17,8 +16,7 @@ public class PlayerInfo {
         this.player = player;
     }
 
-    public void notify(UpdateRoot root) {
-        Collection<RedstoneUpdate> updates = root == null ? Collections.emptyList() : root.updateMap.values();
+    public void notify(Collection<RedstoneUpdate> updates) {
         List<RedstoneUpdate> updateList = new ArrayList<>(updates);
 
         updateList.sort(Comparator.comparingDouble((update)
@@ -42,9 +40,9 @@ public class PlayerInfo {
 
             Hologram hologram = new Hologram(player, x, y, z);
             hologram.addLine("T " + update.relativeTick);
-            hologram.addLine("O " + update.getOrder());
+            hologram.addLine("O " + update.order);
 
-            if (update.getOrder() != update.updateNum) {
+            if (update.order != update.updateNum) {
                 hologram.addLine("U " + update.updateNum);
             }
 

@@ -6,6 +6,7 @@ import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.reflect.StructureModifier;
 import com.comphenix.protocol.wrappers.WrappedWatchableObject;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.util.NumberConversions;
 
@@ -16,7 +17,7 @@ import java.util.List;
 public class HologramPart {
 
     private static final ProtocolManager PROTOCOL_MANAGER = ProtocolLibrary.getProtocolManager();
-    private static int ENTITY_ID = -10000000;
+    private static int ENTITY_ID = -13600000; // high number that is unlikely to be used
     
     private final Player player;
     private final String line;

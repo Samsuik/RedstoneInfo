@@ -10,9 +10,10 @@ public class Hologram {
     private final List<HologramPart> parts = new ArrayList<>();
 
     private final Player player;
-    private double x;
-    private double y;
-    private double z;
+    private final double x;
+    private final double y;
+    private final double z;
+    private int line;
 
     public Hologram(Player player, double x, double y, double z) {
         this.player = player;
@@ -21,9 +22,12 @@ public class Hologram {
         this.z = z;
     }
 
+    private double lineOffset() {
+        return 0.25 * line++;
+    }
+
     public void addLine(String line) {
-        parts.add(new HologramPart(player, line, x, y, z));
-        y -= 0.25;
+        parts.add(new HologramPart(player, line, x, y - lineOffset() , z));
     }
 
     public void create() {

@@ -8,35 +8,49 @@ import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockRedstoneEvent;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.*;
 
 public class RedstoneListener implements Listener, Runnable {
 
     private final List<UpdateRoot> updateRoots = new ArrayList<>();
-    private final Collection<PlayerInfo> players;
+    private final Map<UUID, PlayerInfo> players;
     private int currentTick = 0;
 
-    public RedstoneListener(Collection<PlayerInfo> players) {
+    public RedstoneListener(Map<UUID, PlayerInfo> players) {
         this.players = players;
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent event) {
+        players.remove(event.getPlayer().getUniqueId());
+    }
+
+    @EventHandler
+    public void onWorldChange(PlayerChangedWorldEvent event) {
+        players.remove(event.getPlayer().getUniqueId()); // hacky fix: changing worlds can cause issues
     }
 
     @Override
     public void run() {
-        // Handle the order within the roots
+        // Recalculate the update order within the roots
         for (UpdateRoot root : updateRoots) {
-            root.handleOrder();
+            root.recalculateOrder();
         }
 
-        // Update players
-        for (PlayerInfo playerInfo : players) {
+        // Track players, make sure they're within hologram distance and provide updates.
+        for (PlayerInfo playerInfo : players.values()) {
             Location location = playerInfo.player.getLocation();
-            UpdateRoot root = getRoot(location);
-            playerInfo.notify(root);
+            Collection<RedstoneUpdate> updates = getRoot(location)
+                    .map((a) -> a.updateMap.values())
+                    .orElse(Collections.emptyList());
+            playerInfo.notify(updates);
         }
 
-        // It has not been updated in 30 seconds, so we should remove it
-        this.updateRoots.removeIf((root) -> currentTick - root.getUpdateTick() > 600);
+        // Remove roots that have not been updated in the past 30 seconds
+        this.updateRoots.removeIf((root) -> currentTick - root.getUpdateTick() >= 30 * 20);
 
         // Advance current tick
         this.currentTick++;
@@ -48,7 +62,12 @@ public class RedstoneListener implements Listener, Runnable {
         Location location = block.getLocation();
 
         // Get the closest root or create one from our location
-        UpdateRoot root = getOrCreateRoot(location);
+        UpdateRoot root = getRoot(location).orElseGet(() -> {
+            UpdateRoot n = new UpdateRoot(location, currentTick);
+            updateRoots.add(n);
+            return n;
+        });
+
         RedstoneUpdate update = root.updateMap.get(location);
 
         // Is this really an update?
@@ -69,27 +88,15 @@ public class RedstoneListener implements Listener, Runnable {
         root.setUpdateTick(currentTick);
     }
 
-    private UpdateRoot getOrCreateRoot(Location location)  {
-        UpdateRoot root = getRoot(location);
-
-        if (root == null) {
-            // It doesn't exist, let's create one!
-            root = new UpdateRoot(location, currentTick);
-            updateRoots.add(root);
-        }
-
-        return root;
-    }
-
-    private UpdateRoot getRoot(Location location) {
+    private Optional<UpdateRoot> getRoot(Location location) {
         // Get any nearby root if one exists
         for (UpdateRoot root : updateRoots) {
-            if (location.distanceSquared(root.location) < 256 * 256) {
-                return root;
+            if (location.getWorld().equals(root.location.getWorld()) && location.distanceSquared(root.location) < 256 * 256) {
+                return Optional.of(root);
             }
         }
 
-        return null;
+        return Optional.empty();
     }
 
 }

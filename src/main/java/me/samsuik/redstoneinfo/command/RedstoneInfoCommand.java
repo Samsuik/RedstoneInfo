@@ -20,8 +20,9 @@ public class RedstoneInfoCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!(sender instanceof Player))
+        if (!(sender instanceof Player)) {
             return true;
+        }
 
         Player player = (Player) sender;
         UUID uuid = player.getUniqueId();
